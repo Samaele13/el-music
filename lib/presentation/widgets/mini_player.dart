@@ -29,12 +29,9 @@ class MiniPlayer extends StatelessWidget {
                     Material(
                       color: Colors.grey.shade200.withOpacity(0.95),
                       child: InkWell(
-                        onTap: () {
-                          // Nanti akan membuka halaman full player
-                        },
+                        onTap: () {},
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: Row(
                             children: [
                               ClipRRect(
@@ -44,6 +41,17 @@ class MiniPlayer extends StatelessWidget {
                                   height: 48,
                                   width: 48,
                                   fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      height: 48,
+                                      width: 48,
+                                      color: Colors.grey.shade300,
+                                      child: Icon(
+                                        Icons.music_note_rounded,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -57,7 +65,8 @@ class MiniPlayer extends StatelessWidget {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.w600),
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14),
                                     ),
                                     Text(
                                       song.artist,
@@ -71,6 +80,8 @@ class MiniPlayer extends StatelessWidget {
                                 ),
                               ),
                               IconButton(
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
                                 icon: Icon(
                                   audioProvider.isPlaying
                                       ? Icons.pause_circle_filled
