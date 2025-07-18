@@ -1,3 +1,4 @@
+import 'package:el_music/presentation/pages/player/player_page.dart';
 import 'package:el_music/presentation/providers/audio_player_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +30,28 @@ class MiniPlayer extends StatelessWidget {
                     Material(
                       color: Colors.grey.shade200.withOpacity(0.95),
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.of(context).push(
+                            PageRouteBuilder(
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      const PlayerPage(),
+                              transitionsBuilder: (context, animation,
+                                  secondaryAnimation, child) {
+                                const begin = Offset(0.0, 1.0);
+                                const end = Offset.zero;
+                                const curve = Curves.easeOut;
+                                final tween = Tween(begin: begin, end: end)
+                                    .chain(CurveTween(curve: curve));
+                                final offsetAnimation = animation.drive(tween);
+                                return SlideTransition(
+                                  position: offsetAnimation,
+                                  child: child,
+                                );
+                              },
+                            ),
+                          );
+                        },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: Row(
