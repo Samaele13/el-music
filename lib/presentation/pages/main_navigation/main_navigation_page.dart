@@ -1,6 +1,7 @@
 import 'package:el_music/presentation/pages/home/home_page.dart';
 import 'package:el_music/presentation/pages/library/library_page.dart';
 import 'package:el_music/presentation/pages/search/search_page.dart';
+import 'package:el_music/presentation/widgets/mini_player.dart';
 import 'package:flutter/material.dart';
 
 class MainNavigationPage extends StatefulWidget {
@@ -28,7 +29,17 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: Column(
+        children: [
+          Expanded(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: _pages,
+            ),
+          ),
+          const MiniPlayer(),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
