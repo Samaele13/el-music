@@ -8,6 +8,8 @@ class MiniPlayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Consumer<AudioPlayerProvider>(
       builder: (context, audioProvider, child) {
         final song = audioProvider.currentSong;
@@ -28,7 +30,8 @@ class MiniPlayer extends StatelessWidget {
               : Column(
                   children: [
                     Material(
-                      color: Colors.grey.shade200.withOpacity(0.95),
+                      color: theme.colorScheme.surfaceContainerHighest
+                          .withAlpha(200),
                       child: InkWell(
                         onTap: () {
                           Navigator.of(context).push(
@@ -86,9 +89,10 @@ class MiniPlayer extends StatelessWidget {
                                       song.title,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           fontWeight: FontWeight.w600,
-                                          fontSize: 14),
+                                          fontSize: 14,
+                                          color: theme.colorScheme.onSurface),
                                     ),
                                     Text(
                                       song.artist,
@@ -96,7 +100,8 @@ class MiniPlayer extends StatelessWidget {
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                           fontSize: 12,
-                                          color: Colors.grey.shade700),
+                                          color: theme
+                                              .colorScheme.onSurfaceVariant),
                                     ),
                                   ],
                                 ),
@@ -108,7 +113,7 @@ class MiniPlayer extends StatelessWidget {
                                   audioProvider.isPlaying
                                       ? Icons.pause_circle_filled
                                       : Icons.play_circle_filled,
-                                  color: Theme.of(context).colorScheme.primary,
+                                  color: theme.colorScheme.primary,
                                 ),
                                 iconSize: 40,
                                 onPressed: () {
@@ -126,9 +131,10 @@ class MiniPlayer extends StatelessWidget {
                     ),
                     LinearProgressIndicator(
                       value: progress,
-                      backgroundColor: Colors.grey.shade300,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).colorScheme.primary),
+                          theme.colorScheme.primary),
                       minHeight: 2,
                     ),
                   ],

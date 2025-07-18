@@ -39,7 +39,7 @@ class PlayerPage extends StatelessWidget {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                   child: Container(
-                    color: Colors.black.withOpacity(0.4),
+                    color: Colors.black.withAlpha(102),
                   ),
                 ),
               ),
@@ -92,10 +92,10 @@ class PlayerPage extends StatelessWidget {
                       Text(
                         song.artist,
                         style: TextStyle(
-                            color: Colors.white.withOpacity(0.7), fontSize: 16),
+                            color: Colors.white.withAlpha(178), fontSize: 16),
                       ),
                       const Spacer(),
-                      _buildSongSlider(audioProvider),
+                      _buildSongSlider(context, audioProvider),
                       const SizedBox(height: 20),
                       _buildControls(context, audioProvider),
                       const Spacer(),
@@ -110,7 +110,10 @@ class PlayerPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSongSlider(AudioPlayerProvider audioProvider) {
+  Widget _buildSongSlider(
+      BuildContext context, AudioPlayerProvider audioProvider) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         SliderTheme(
@@ -118,10 +121,10 @@ class PlayerPage extends StatelessWidget {
             trackHeight: 4,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
             overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-            activeTrackColor: Colors.white,
-            inactiveTrackColor: Colors.white.withOpacity(0.3),
-            thumbColor: Colors.white,
-            overlayColor: Colors.white.withOpacity(0.2),
+            activeTrackColor: theme.colorScheme.primary,
+            inactiveTrackColor: theme.colorScheme.primary.withAlpha(77),
+            thumbColor: theme.colorScheme.primary,
+            overlayColor: theme.colorScheme.primary.withAlpha(51),
           ),
           child: Slider(
             min: 0.0,
@@ -139,9 +142,11 @@ class PlayerPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(_formatDuration(audioProvider.position),
-                style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                style: TextStyle(
+                    color: Colors.white.withAlpha(178), fontSize: 12)),
             Text(_formatDuration(audioProvider.duration),
-                style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                style: TextStyle(
+                    color: Colors.white.withAlpha(178), fontSize: 12)),
           ],
         ),
       ],
@@ -153,7 +158,7 @@ class PlayerPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        const Icon(Icons.shuffle, color: Colors.white70, size: 28),
+        Icon(Icons.shuffle, color: Colors.white.withAlpha(178), size: 28),
         const Icon(Icons.skip_previous_rounded, color: Colors.white, size: 48),
         GestureDetector(
           onTap: () {
@@ -172,7 +177,7 @@ class PlayerPage extends StatelessWidget {
           ),
         ),
         const Icon(Icons.skip_next_rounded, color: Colors.white, size: 48),
-        const Icon(Icons.repeat, color: Colors.white70, size: 28),
+        Icon(Icons.repeat, color: Colors.white.withAlpha(178), size: 28),
       ],
     );
   }
