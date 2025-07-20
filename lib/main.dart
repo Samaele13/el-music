@@ -7,6 +7,7 @@ import 'package:el_music/domain/usecases/get_recently_played_usecase.dart';
 import 'package:el_music/domain/usecases/get_search_categories_usecase.dart';
 import 'package:el_music/presentation/pages/main_navigation/main_navigation_page.dart';
 import 'package:el_music/presentation/providers/audio_player_provider.dart';
+import 'package:el_music/presentation/providers/auth_provider.dart';
 import 'package:el_music/presentation/providers/home_page_provider.dart';
 import 'package:el_music/presentation/providers/search_page_provider.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider(dio: dio)),
         ChangeNotifierProvider(create: (_) => AudioPlayerProvider()),
         ChangeNotifierProvider(
           create: (_) => HomePageProvider(

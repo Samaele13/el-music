@@ -1,4 +1,7 @@
+import 'package:el_music/presentation/pages/auth/login_page.dart';
+import 'package:el_music/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LibraryPage extends StatelessWidget {
   const LibraryPage({super.key});
@@ -18,6 +21,16 @@ class LibraryPage extends StatelessWidget {
           SliverList(
             delegate: SliverChildListDelegate(
               [
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) {
+                    if (authProvider.isLoggedIn) {
+                      return _buildProfileItem(context, authProvider);
+                    } else {
+                      return _buildAuthItem(context);
+                    }
+                  },
+                ),
+                const Divider(height: 16, indent: 16, endIndent: 16),
                 _buildLibraryItem(context,
                     icon: Icons.playlist_play, title: 'Playlist'),
                 _buildLibraryItem(context,
@@ -35,6 +48,68 @@ class LibraryPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProfileItem(BuildContext context, AuthProvider authProvider) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 24,
+            child: Icon(Icons.person),
+          ),
+          const SizedBox(width: 20),
+          const Expanded(
+            child: Text(
+              'Nama Pengguna', // Nanti kita ambil dari token
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              authProvider.logout();
+            },
+            child: const Text('Keluar'),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAuthItem(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          child: Row(
+            children: [
+              Icon(
+                Icons.person_outline,
+                color: Theme.of(context).colorScheme.primary,
+                size: 28,
+              ),
+              const SizedBox(width: 20),
+              const Text(
+                'Masuk atau Daftar',
+                style: TextStyle(fontSize: 18),
+              ),
+              const Spacer(),
+              Icon(
+                Icons.chevron_right,
+                color: Colors.grey.shade400,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
