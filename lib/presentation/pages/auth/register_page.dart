@@ -1,3 +1,4 @@
+import 'package:el_music/presentation/pages/auth/verify_email_page.dart';
 import 'package:el_music/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -54,12 +55,13 @@ class _RegisterPageState extends State<RegisterPage> {
               );
               authProvider.resetRegisterState();
             } else if (authProvider.registerState == AuthState.success) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Registrasi berhasil! Silakan masuk.')),
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      VerifyEmailPage(email: _emailController.text),
+                ),
               );
               authProvider.resetRegisterState();
-              Navigator.of(context).pop();
             }
           });
 

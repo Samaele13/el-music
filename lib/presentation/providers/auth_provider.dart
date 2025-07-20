@@ -95,6 +95,8 @@ class AuthProvider with ChangeNotifier {
       _loginState = AuthState.error;
       if (e.response?.statusCode == 401) {
         _errorMessage = 'Email atau password salah.';
+      } else if (e.response?.statusCode == 403) {
+        _errorMessage = 'Harap verifikasi email Anda terlebih dahulu.';
       } else {
         _errorMessage = 'Gagal terhubung ke server.';
       }
