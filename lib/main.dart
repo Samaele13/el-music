@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:el_music/app/config/theme/app_theme.dart';
 import 'package:el_music/data/datasources/song_remote_data_source.dart';
 import 'package:el_music/data/repositories/song_repository_impl.dart';
@@ -12,7 +13,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  final songRemoteDataSource = SongRemoteDataSourceImpl();
+  final dio = Dio(BaseOptions(baseUrl: 'http://localhost:8080/api/v1'));
+
+  final songRemoteDataSource = SongRemoteDataSourceImpl(dio: dio);
   final songRepository =
       SongRepositoryImpl(remoteDataSource: songRemoteDataSource);
   final getRecentlyPlayedUseCase = GetRecentlyPlayedUseCase(songRepository);

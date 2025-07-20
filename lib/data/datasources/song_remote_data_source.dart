@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:el_music/data/models/category_model.dart';
 import 'package:el_music/data/models/song_model.dart';
 
@@ -8,9 +9,60 @@ abstract class SongRemoteDataSource {
 }
 
 class SongRemoteDataSourceImpl implements SongRemoteDataSource {
+  final Dio dio;
+
+  SongRemoteDataSourceImpl({required this.dio});
+
   @override
   Future<List<SongModel>> getRecentlyPlayed() async {
-    await Future.delayed(const Duration(milliseconds: 800));
+    try {
+      final response = await dio.get('/songs/recently-played');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        return data.map((json) => SongModel.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load recently played songs');
+      }
+    } catch (e) {
+      return _getMockRecentlyPlayed();
+    }
+  }
+
+  @override
+  Future<List<SongModel>> getMadeForYou() async {
+    try {
+      final response = await dio.get('/songs/made-for-you');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        return data.map((json) => SongModel.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load made for you songs');
+      }
+    } catch (e) {
+      return _getMockMadeForYou();
+    }
+  }
+
+  @override
+  Future<List<CategoryModel>> getSearchCategories() async {
+    try {
+      // Perbaikan kecil: path harusnya /categories/search
+      final response = await dio.get('/categories/search');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        return data.map((json) => CategoryModel.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load search categories');
+      }
+    } catch (e) {
+      return _getMockCategories();
+    }
+  }
+
+  List<SongModel> _getMockRecentlyPlayed() {
     return List.generate(
       8,
       (index) => SongModel(
@@ -25,9 +77,7 @@ class SongRemoteDataSourceImpl implements SongRemoteDataSource {
     );
   }
 
-  @override
-  Future<List<SongModel>> getMadeForYou() async {
-    await Future.delayed(const Duration(milliseconds: 1200));
+  List<SongModel> _getMockMadeForYou() {
     return List.generate(
       8,
       (index) => SongModel(
@@ -42,9 +92,7 @@ class SongRemoteDataSourceImpl implements SongRemoteDataSource {
     );
   }
 
-  @override
-  Future<List<CategoryModel>> getSearchCategories() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+  List<CategoryModel> _getMockCategories() {
     const categories = [
       'Pop',
       'Rock',
