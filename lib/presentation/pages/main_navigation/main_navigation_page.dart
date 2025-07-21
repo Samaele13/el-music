@@ -3,6 +3,7 @@ import 'package:el_music/presentation/pages/library/library_page.dart';
 import 'package:el_music/presentation/pages/search/search_page.dart';
 import 'package:el_music/presentation/providers/auth_provider.dart';
 import 'package:el_music/presentation/providers/home_page_provider.dart';
+import 'package:el_music/presentation/providers/playlist_provider.dart';
 import 'package:el_music/presentation/providers/search_page_provider.dart';
 import 'package:el_music/presentation/widgets/mini_player.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     if (isLoggedInNow && !_wasLoggedIn) {
       Provider.of<HomePageProvider>(context, listen: false).fetchSongs();
       Provider.of<SearchPageProvider>(context, listen: false).fetchCategories();
+      Provider.of<PlaylistProvider>(context, listen: false).fetchPlaylists();
     }
     _wasLoggedIn = isLoggedInNow;
   }

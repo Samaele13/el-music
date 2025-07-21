@@ -1,10 +1,44 @@
 import 'package:el_music/presentation/pages/auth/login_page.dart';
 import 'package:el_music/presentation/providers/auth_provider.dart';
+import 'package:el_music/presentation/providers/playlist_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class LibraryPage extends StatelessWidget {
   const LibraryPage({super.key});
+
+  void _showCreatePlaylistDialog(BuildContext context) {
+    final playlistProvider =
+        Provider.of<PlaylistProvider>(context, listen: false);
+    final nameController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Playlist Baru'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(hintText: "Nama playlist"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (nameController.text.isNotEmpty) {
+                  playlistProvider.createPlaylist(nameController.text);
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Buat'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,24 +65,53 @@ class LibraryPage extends StatelessWidget {
                   },
                 ),
                 const Divider(height: 16, indent: 16, endIndent: 16),
-                _buildLibraryItem(context,
-                    icon: Icons.playlist_play, title: 'Playlist'),
-                _buildLibraryItem(context,
-                    icon: Icons.mic_external_on_outlined, title: 'Artis'),
-                _buildLibraryItem(context,
-                    icon: Icons.album_outlined, title: 'Album'),
-                _buildLibraryItem(context,
-                    icon: Icons.music_note_outlined, title: 'Lagu'),
-                const Divider(height: 32, indent: 16, endIndent: 16),
-                _buildLibraryItem(context,
-                    icon: Icons.history, title: 'Baru Diputar'),
-                _buildLibraryItem(context,
-                    icon: Icons.add_box_outlined, title: 'Baru Ditambahkan'),
               ],
             ),
           ),
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              if (!authProvider.isLoggedIn) {
+                return SliverToBoxAdapter(child: Container());
+              }
+              return _buildPlaylistSection(context);
+            },
+          )
         ],
       ),
+    );
+  }
+
+  Widget _buildPlaylistSection(BuildContext context) {
+    return Consumer<PlaylistProvider>(
+      builder: (context, playlistProvider, child) {
+        if (playlistProvider.state == PlaylistState.loading) {
+          return const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()));
+        }
+
+        return SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              if (index == 0) {
+                return _buildLibraryItem(
+                  context,
+                  icon: Icons.add,
+                  title: 'Buat Playlist Baru',
+                  onTap: () => _showCreatePlaylistDialog(context),
+                );
+              }
+              final playlist = playlistProvider.playlists[index - 1];
+              return _buildLibraryItem(
+                context,
+                icon: Icons.playlist_play,
+                title: playlist.name,
+                onTap: () {},
+              );
+            },
+            childCount: playlistProvider.playlists.length + 1,
+          ),
+        );
+      },
     );
   }
 
@@ -64,7 +127,7 @@ class LibraryPage extends StatelessWidget {
           const SizedBox(width: 20),
           const Expanded(
             child: Text(
-              'Nama Pengguna', // Nanti kita ambil dari token
+              'Nama Pengguna',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -115,11 +178,13 @@ class LibraryPage extends StatelessWidget {
   }
 
   Widget _buildLibraryItem(BuildContext context,
-      {required IconData icon, required String title}) {
+      {required IconData icon,
+      required String title,
+      required VoidCallback onTap}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           child: Row(

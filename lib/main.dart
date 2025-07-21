@@ -2,13 +2,16 @@ import 'package:dio/dio.dart';
 import 'package:el_music/app/config/theme/app_theme.dart';
 import 'package:el_music/data/datasources/song_remote_data_source.dart';
 import 'package:el_music/data/repositories/song_repository_impl.dart';
+import 'package:el_music/domain/usecases/create_playlist_usecase.dart';
 import 'package:el_music/domain/usecases/get_made_for_you_usecase.dart';
 import 'package:el_music/domain/usecases/get_recently_played_usecase.dart';
 import 'package:el_music/domain/usecases/get_search_categories_usecase.dart';
+import 'package:el_music/domain/usecases/get_user_playlists_usecase.dart';
 import 'package:el_music/presentation/pages/main_navigation/main_navigation_page.dart';
 import 'package:el_music/presentation/providers/audio_player_provider.dart';
 import 'package:el_music/presentation/providers/auth_provider.dart';
 import 'package:el_music/presentation/providers/home_page_provider.dart';
+import 'package:el_music/presentation/providers/playlist_provider.dart';
 import 'package:el_music/presentation/providers/search_page_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,9 +22,12 @@ void main() {
   final songRemoteDataSource = SongRemoteDataSourceImpl(dio: dio);
   final songRepository =
       SongRepositoryImpl(remoteDataSource: songRemoteDataSource);
+
   final getRecentlyPlayedUseCase = GetRecentlyPlayedUseCase(songRepository);
   final getMadeForYouUseCase = GetMadeForYouUseCase(songRepository);
   final getSearchCategoriesUseCase = GetSearchCategoriesUseCase(songRepository);
+  final getUserPlaylistsUseCase = GetUserPlaylistsUseCase(songRepository);
+  final createPlaylistUseCase = CreatePlaylistUseCase(songRepository);
 
   runApp(
     MultiProvider(
@@ -37,6 +43,12 @@ void main() {
         ChangeNotifierProvider(
           create: (_) => SearchPageProvider(
             getSearchCategoriesUseCase: getSearchCategoriesUseCase,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => PlaylistProvider(
+            getUserPlaylistsUseCase: getUserPlaylistsUseCase,
+            createPlaylistUseCase: createPlaylistUseCase,
           ),
         ),
       ],

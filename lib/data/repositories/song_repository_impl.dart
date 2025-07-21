@@ -3,12 +3,12 @@ import 'package:el_music/core/failure/exception.dart';
 import 'package:el_music/core/failure/failure.dart';
 import 'package:el_music/data/datasources/song_remote_data_source.dart';
 import 'package:el_music/domain/entities/category.dart';
+import 'package:el_music/domain/entities/playlist.dart';
 import 'package:el_music/domain/entities/song.dart';
 import 'package:el_music/domain/repositories/song_repository.dart';
 
 class SongRepositoryImpl implements SongRepository {
   final SongRemoteDataSource remoteDataSource;
-
   SongRepositoryImpl({required this.remoteDataSource});
 
   @override
@@ -37,6 +37,26 @@ class SongRepositoryImpl implements SongRepository {
       final remoteCategories = await remoteDataSource.getSearchCategories();
       return Right(remoteCategories);
     } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Playlist>>> getUserPlaylists() async {
+    try {
+      final remotePlaylists = await remoteDataSource.getUserPlaylists();
+      return Right(remotePlaylists);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Playlist>> createPlaylist(String name) async {
+    try {
+      final newPlaylist = await remoteDataSource.createPlaylist(name);
+      return Right(newPlaylist);
+    } catch (e) {
       return Left(ServerFailure());
     }
   }

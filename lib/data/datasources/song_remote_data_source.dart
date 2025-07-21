@@ -1,23 +1,24 @@
 import 'package:dio/dio.dart';
 import 'package:el_music/data/models/category_model.dart';
+import 'package:el_music/data/models/playlist_model.dart';
 import 'package:el_music/data/models/song_model.dart';
 
 abstract class SongRemoteDataSource {
   Future<List<SongModel>> getRecentlyPlayed();
   Future<List<SongModel>> getMadeForYou();
   Future<List<CategoryModel>> getSearchCategories();
+  Future<List<PlaylistModel>> getUserPlaylists();
+  Future<PlaylistModel> createPlaylist(String name);
 }
 
 class SongRemoteDataSourceImpl implements SongRemoteDataSource {
   final Dio dio;
-
   SongRemoteDataSourceImpl({required this.dio});
 
   @override
   Future<List<SongModel>> getRecentlyPlayed() async {
     try {
       final response = await dio.get('/songs/recently-played');
-
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         return data.map((json) => SongModel.fromJson(json)).toList();
@@ -33,7 +34,6 @@ class SongRemoteDataSourceImpl implements SongRemoteDataSource {
   Future<List<SongModel>> getMadeForYou() async {
     try {
       final response = await dio.get('/songs/made-for-you');
-
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         return data.map((json) => SongModel.fromJson(json)).toList();
@@ -48,9 +48,7 @@ class SongRemoteDataSourceImpl implements SongRemoteDataSource {
   @override
   Future<List<CategoryModel>> getSearchCategories() async {
     try {
-      // Perbaikan kecil: path harusnya /categories/search
       final response = await dio.get('/categories/search');
-
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         return data.map((json) => CategoryModel.fromJson(json)).toList();
@@ -60,6 +58,19 @@ class SongRemoteDataSourceImpl implements SongRemoteDataSource {
     } catch (e) {
       return _getMockCategories();
     }
+  }
+
+  @override
+  Future<List<PlaylistModel>> getUserPlaylists() async {
+    final response = await dio.get('/playlists');
+    final List<dynamic> data = response.data;
+    return data.map((json) => PlaylistModel.fromJson(json)).toList();
+  }
+
+  @override
+  Future<PlaylistModel> createPlaylist(String name) async {
+    final response = await dio.post('/playlists', data: {'name': name});
+    return PlaylistModel.fromJson(response.data);
   }
 
   List<SongModel> _getMockRecentlyPlayed() {
