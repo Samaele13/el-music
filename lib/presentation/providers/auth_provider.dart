@@ -9,15 +9,22 @@ class AuthProvider with ChangeNotifier {
 
   AuthState _registerState = AuthState.initial;
   AuthState _loginState = AuthState.initial;
+  AuthState _forgotPasswordState = AuthState.initial;
+  AuthState _resetPasswordState = AuthState.initial;
+
   String _errorMessage = '';
   String? _token;
 
   AuthState get registerState => _registerState;
   AuthState get loginState => _loginState;
+  AuthState get forgotPasswordState => _forgotPasswordState;
+  AuthState get resetPasswordState => _resetPasswordState;
+
   String get errorMessage => _errorMessage;
   bool get isLoggedIn => _token != null;
 
   void _setupDioInterceptor() {
+    dio.interceptors.clear();
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -30,13 +37,11 @@ class AuthProvider with ChangeNotifier {
     );
   }
 
-  void resetRegisterState() {
+  void resetAllStates() {
     _registerState = AuthState.initial;
-    _errorMessage = '';
-  }
-
-  void resetLoginState() {
     _loginState = AuthState.initial;
+    _forgotPasswordState = AuthState.initial;
+    _resetPasswordState = AuthState.initial;
     _errorMessage = '';
   }
 
@@ -55,16 +60,14 @@ class AuthProvider with ChangeNotifier {
       if (response.statusCode == 201) {
         _registerState = AuthState.success;
       } else {
-        _registerState = AuthState.error;
-        _errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+        throw DioException(
+            requestOptions: response.requestOptions, response: response);
       }
     } on DioException catch (e) {
       _registerState = AuthState.error;
-      if (e.response?.statusCode == 409) {
-        _errorMessage = 'Email sudah terdaftar.';
-      } else {
-        _errorMessage = 'Gagal terhubung ke server.';
-      }
+      _errorMessage = e.response?.statusCode == 409
+          ? 'Email sudah terdaftar.'
+          : 'Gagal terhubung ke server.';
     } catch (e) {
       _registerState = AuthState.error;
       _errorMessage = 'Terjadi kesalahan yang tidak diketahui.';
@@ -88,8 +91,8 @@ class AuthProvider with ChangeNotifier {
         _setupDioInterceptor();
         _loginState = AuthState.success;
       } else {
-        _loginState = AuthState.error;
-        _errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+        throw DioException(
+            requestOptions: response.requestOptions, response: response);
       }
     } on DioException catch (e) {
       _loginState = AuthState.error;
@@ -103,6 +106,35 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       _loginState = AuthState.error;
       _errorMessage = 'Terjadi kesalahan yang tidak diketahui.';
+    }
+    notifyListeners();
+  }
+
+  Future<void> forgotPassword({required String email}) async {
+    _forgotPasswordState = AuthState.loading;
+    notifyListeners();
+    try {
+      await dio.post('/auth/forgot-password', data: {'email': email});
+      _forgotPasswordState = AuthState.success;
+    } catch (e) {
+      _forgotPasswordState = AuthState.error;
+      _errorMessage = 'Gagal mengirim link reset. Silakan coba lagi.';
+    }
+    notifyListeners();
+  }
+
+  Future<void> resetPassword(
+      {required String token, required String newPassword}) async {
+    _resetPasswordState = AuthState.loading;
+    notifyListeners();
+    try {
+      await dio.post('/auth/reset-password',
+          data: {'token': token, 'newPassword': newPassword});
+      _resetPasswordState = AuthState.success;
+    } catch (e) {
+      _resetPasswordState = AuthState.error;
+      _errorMessage =
+          'Token tidak valid atau kedaluwarsa. Silakan minta link baru.';
     }
     notifyListeners();
   }
