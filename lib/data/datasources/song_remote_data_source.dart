@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:el_music/data/models/category_model.dart';
+import 'package:el_music/data/models/playlist_detail_model.dart';
 import 'package:el_music/data/models/playlist_model.dart';
 import 'package:el_music/data/models/song_model.dart';
 
@@ -9,11 +10,18 @@ abstract class SongRemoteDataSource {
   Future<List<CategoryModel>> getSearchCategories();
   Future<List<PlaylistModel>> getUserPlaylists();
   Future<PlaylistModel> createPlaylist(String name);
+  Future<PlaylistDetailModel> getPlaylistDetail(String id);
 }
 
 class SongRemoteDataSourceImpl implements SongRemoteDataSource {
   final Dio dio;
   SongRemoteDataSourceImpl({required this.dio});
+
+  @override
+  Future<PlaylistDetailModel> getPlaylistDetail(String id) async {
+    final response = await dio.get('/playlists/$id');
+    return PlaylistDetailModel.fromJson(response.data);
+  }
 
   @override
   Future<List<SongModel>> getRecentlyPlayed() async {

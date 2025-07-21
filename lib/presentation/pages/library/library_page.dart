@@ -1,4 +1,5 @@
 import 'package:el_music/presentation/pages/auth/login_page.dart';
+import 'package:el_music/presentation/pages/playlist/playlist_detail_page.dart';
 import 'package:el_music/presentation/providers/auth_provider.dart';
 import 'package:el_music/presentation/providers/playlist_provider.dart';
 import 'package:flutter/material.dart';
@@ -84,7 +85,7 @@ class LibraryPage extends StatelessWidget {
   Widget _buildPlaylistSection(BuildContext context) {
     return Consumer<PlaylistProvider>(
       builder: (context, playlistProvider, child) {
-        if (playlistProvider.state == PlaylistState.loading) {
+        if (playlistProvider.listState == DataState.loading) {
           return const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()));
         }
@@ -105,7 +106,16 @@ class LibraryPage extends StatelessWidget {
                 context,
                 icon: Icons.playlist_play,
                 title: playlist.name,
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => PlaylistDetailPage(
+                        playlistId: playlist.id,
+                        playlistName: playlist.name,
+                      ),
+                    ),
+                  );
+                },
               );
             },
             childCount: playlistProvider.playlists.length + 1,

@@ -4,6 +4,7 @@ import 'package:el_music/data/datasources/song_remote_data_source.dart';
 import 'package:el_music/data/repositories/song_repository_impl.dart';
 import 'package:el_music/domain/usecases/create_playlist_usecase.dart';
 import 'package:el_music/domain/usecases/get_made_for_you_usecase.dart';
+import 'package:el_music/domain/usecases/get_playlist_detail_usecase.dart';
 import 'package:el_music/domain/usecases/get_recently_played_usecase.dart';
 import 'package:el_music/domain/usecases/get_search_categories_usecase.dart';
 import 'package:el_music/domain/usecases/get_user_playlists_usecase.dart';
@@ -28,6 +29,7 @@ void main() {
   final getSearchCategoriesUseCase = GetSearchCategoriesUseCase(songRepository);
   final getUserPlaylistsUseCase = GetUserPlaylistsUseCase(songRepository);
   final createPlaylistUseCase = CreatePlaylistUseCase(songRepository);
+  final getPlaylistDetailUseCase = GetPlaylistDetailUseCase(songRepository);
 
   runApp(
     MultiProvider(
@@ -49,6 +51,7 @@ void main() {
           create: (_) => PlaylistProvider(
             getUserPlaylistsUseCase: getUserPlaylistsUseCase,
             createPlaylistUseCase: createPlaylistUseCase,
+            getPlaylistDetailUseCase: getPlaylistDetailUseCase,
           ),
         ),
       ],
