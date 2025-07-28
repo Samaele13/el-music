@@ -19,4 +19,5 @@ abstract class SongRepository {
       {required String playlistId, required String songId});
   Future<Either<Failure, List<Song>>> searchSongs(String query);
   Future<Either<Failure, List<LyricLine>>> getLyricsForSong(String songId);
+  Future<Either<Failure, String>> createTransaction(String plan);
 }

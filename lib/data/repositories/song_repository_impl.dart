@@ -14,6 +14,16 @@ class SongRepositoryImpl implements SongRepository {
   SongRepositoryImpl({required this.remoteDataSource});
 
   @override
+  Future<Either<Failure, String>> createTransaction(String plan) async {
+    try {
+      final paymentUrl = await remoteDataSource.createTransaction(plan);
+      return Right(paymentUrl);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, List<LyricLine>>> getLyricsForSong(
       String songId) async {
     try {

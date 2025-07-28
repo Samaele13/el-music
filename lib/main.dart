@@ -4,6 +4,7 @@ import 'package:el_music/data/datasources/song_remote_data_source.dart';
 import 'package:el_music/data/repositories/song_repository_impl.dart';
 import 'package:el_music/domain/usecases/add_song_to_playlist_usecase.dart';
 import 'package:el_music/domain/usecases/create_playlist_usecase.dart';
+import 'package:el_music/domain/usecases/create_transaction_usecase.dart';
 import 'package:el_music/domain/usecases/get_lyrics_usecase.dart';
 import 'package:el_music/domain/usecases/get_made_for_you_usecase.dart';
 import 'package:el_music/domain/usecases/get_playlist_detail_usecase.dart';
@@ -17,6 +18,7 @@ import 'package:el_music/presentation/providers/audio_player_provider.dart';
 import 'package:el_music/presentation/providers/auth_provider.dart';
 import 'package:el_music/presentation/providers/home_page_provider.dart';
 import 'package:el_music/presentation/providers/lyrics_provider.dart';
+import 'package:el_music/presentation/providers/payment_provider.dart';
 import 'package:el_music/presentation/providers/playlist_provider.dart';
 import 'package:el_music/presentation/providers/search_page_provider.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +28,8 @@ void main() {
   final dio = Dio(BaseOptions(baseUrl: 'http://localhost:8080/api/v1'));
 
   final songRemoteDataSource = SongRemoteDataSourceImpl(dio: dio);
-  final songRepository = SongRepositoryImpl(remoteDataSource: songRemoteDataSource);
+  final songRepository =
+      SongRepositoryImpl(remoteDataSource: songRemoteDataSource);
 
   final getRecentlyPlayedUseCase = GetRecentlyPlayedUseCase(songRepository);
   final getMadeForYouUseCase = GetMadeForYouUseCase(songRepository);
@@ -35,9 +38,11 @@ void main() {
   final createPlaylistUseCase = CreatePlaylistUseCase(songRepository);
   final getPlaylistDetailUseCase = GetPlaylistDetailUseCase(songRepository);
   final addSongToPlaylistUseCase = AddSongToPlaylistUseCase(songRepository);
-  final removeSongFromPlaylistUseCase = RemoveSongFromPlaylistUseCase(songRepository);
+  final removeSongFromPlaylistUseCase =
+      RemoveSongFromPlaylistUseCase(songRepository);
   final searchSongsUseCase = SearchSongsUseCase(songRepository);
   final getLyricsUseCase = GetLyricsUseCase(songRepository);
+  final createTransactionUseCase = CreateTransactionUseCase(songRepository);
 
   runApp(
     MultiProvider(
@@ -67,6 +72,10 @@ void main() {
         ),
         ChangeNotifierProvider(
           create: (_) => LyricsProvider(getLyricsUseCase: getLyricsUseCase),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => PaymentProvider(
+              createTransactionUseCase: createTransactionUseCase),
         ),
       ],
       child: const MyApp(),

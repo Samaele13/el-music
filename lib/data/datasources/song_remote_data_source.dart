@@ -18,11 +18,18 @@ abstract class SongRemoteDataSource {
       {required String playlistId, required String songId});
   Future<List<SongModel>> searchSongs(String query);
   Future<List<LyricLineModel>> getLyricsForSong(String songId);
+  Future<String> createTransaction(String plan);
 }
 
 class SongRemoteDataSourceImpl implements SongRemoteDataSource {
   final Dio dio;
   SongRemoteDataSourceImpl({required this.dio});
+
+  @override
+  Future<String> createTransaction(String plan) async {
+    final response = await dio.post('/payments/charge', data: {'plan': plan});
+    return response.data['payment_url'];
+  }
 
   @override
   Future<List<LyricLineModel>> getLyricsForSong(String songId) async {
@@ -64,7 +71,7 @@ class SongRemoteDataSourceImpl implements SongRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((json) => SongModel.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load recently played songs');
+        throw Exception();
       }
     } catch (e) {
       return _getMockRecentlyPlayed();
@@ -79,7 +86,7 @@ class SongRemoteDataSourceImpl implements SongRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((json) => SongModel.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load made for you songs');
+        throw Exception();
       }
     } catch (e) {
       return _getMockMadeForYou();
@@ -94,7 +101,7 @@ class SongRemoteDataSourceImpl implements SongRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((json) => CategoryModel.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load search categories');
+        throw Exception();
       }
     } catch (e) {
       return _getMockCategories();
