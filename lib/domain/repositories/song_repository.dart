@@ -12,4 +12,8 @@ abstract class SongRepository {
   Future<Either<Failure, List<Playlist>>> getUserPlaylists();
   Future<Either<Failure, Playlist>> createPlaylist(String name);
   Future<Either<Failure, PlaylistDetail>> getPlaylistDetail(String id);
+  Future<Either<Failure, void>> addSongToPlaylist(
+      {required String playlistId, required String songId});
+  Future<Either<Failure, void>> removeSongFromPlaylist(
+      {required String playlistId, required String songId});
 }

@@ -11,6 +11,10 @@ abstract class SongRemoteDataSource {
   Future<List<PlaylistModel>> getUserPlaylists();
   Future<PlaylistModel> createPlaylist(String name);
   Future<PlaylistDetailModel> getPlaylistDetail(String id);
+  Future<void> addSongToPlaylist(
+      {required String playlistId, required String songId});
+  Future<void> removeSongFromPlaylist(
+      {required String playlistId, required String songId});
 }
 
 class SongRemoteDataSourceImpl implements SongRemoteDataSource {
@@ -18,11 +22,24 @@ class SongRemoteDataSourceImpl implements SongRemoteDataSource {
   SongRemoteDataSourceImpl({required this.dio});
 
   @override
+  Future<void> removeSongFromPlaylist(
+      {required String playlistId, required String songId}) async {
+    await dio.delete('/playlists/$playlistId/songs/$songId');
+  }
+
+  @override
+  Future<void> addSongToPlaylist(
+      {required String playlistId, required String songId}) async {
+    await dio.post('/playlists/$playlistId/songs', data: {'song_id': songId});
+  }
+
+  @override
   Future<PlaylistDetailModel> getPlaylistDetail(String id) async {
     final response = await dio.get('/playlists/$id');
     return PlaylistDetailModel.fromJson(response.data);
   }
 
+  // ... (sisa kode biarkan sama)
   @override
   Future<List<SongModel>> getRecentlyPlayed() async {
     try {

@@ -1,3 +1,4 @@
+import 'package:el_music/domain/entities/song.dart';
 import 'package:el_music/presentation/providers/playlist_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +25,40 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
       Provider.of<PlaylistProvider>(context, listen: false)
           .fetchPlaylistDetail(widget.playlistId);
     });
+  }
+
+  void _showSongOptions(BuildContext context, Song song) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Wrap(
+          children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.remove_circle_outline),
+              title: const Text('Hapus dari Playlist ini'),
+              onTap: () async {
+                Navigator.of(context).pop();
+                final provider =
+                    Provider.of<PlaylistProvider>(context, listen: false);
+                final success = await provider.removeSongFromPlaylist(
+                  playlistId: widget.playlistId,
+                  song: song,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'Berhasil dihapus dari playlist'
+                          : 'Gagal menghapus lagu',
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -71,6 +106,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                       ),
                       title: Text(song.title),
                       subtitle: Text(song.artist),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.more_vert),
+                        onPressed: () => _showSongOptions(context, song),
+                      ),
                       onTap: () {
                         // Play song logic
                       },

@@ -13,12 +13,36 @@ class SongRepositoryImpl implements SongRepository {
   SongRepositoryImpl({required this.remoteDataSource});
 
   @override
+  Future<Either<Failure, void>> removeSongFromPlaylist(
+      {required String playlistId, required String songId}) async {
+    try {
+      await remoteDataSource.removeSongFromPlaylist(
+          playlistId: playlistId, songId: songId);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> addSongToPlaylist(
+      {required String playlistId, required String songId}) async {
+    try {
+      await remoteDataSource.addSongToPlaylist(
+          playlistId: playlistId, songId: songId);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  // ... (sisa kode biarkan sama)
+  @override
   Future<Either<Failure, PlaylistDetail>> getPlaylistDetail(String id) async {
     try {
       final remoteDetail = await remoteDataSource.getPlaylistDetail(id);
       return Right(remoteDetail);
     } catch (e) {
-      print('=== ERROR GET PLAYLIST DETAIL: $e ===');
       return Left(ServerFailure());
     }
   }
