@@ -13,6 +13,17 @@ class SongRepositoryImpl implements SongRepository {
   SongRepositoryImpl({required this.remoteDataSource});
 
   @override
+  Future<Either<Failure, List<Song>>> searchSongs(String query) async {
+    try {
+      final remoteSongs = await remoteDataSource.searchSongs(query);
+      return Right(remoteSongs);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  // ... (sisa kode biarkan sama)
+  @override
   Future<Either<Failure, void>> removeSongFromPlaylist(
       {required String playlistId, required String songId}) async {
     try {
@@ -36,7 +47,6 @@ class SongRepositoryImpl implements SongRepository {
     }
   }
 
-  // ... (sisa kode biarkan sama)
   @override
   Future<Either<Failure, PlaylistDetail>> getPlaylistDetail(String id) async {
     try {

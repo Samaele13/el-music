@@ -16,4 +16,5 @@ abstract class SongRepository {
       {required String playlistId, required String songId});
   Future<Either<Failure, void>> removeSongFromPlaylist(
       {required String playlistId, required String songId});
+  Future<Either<Failure, List<Song>>> searchSongs(String query);
 }

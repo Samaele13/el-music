@@ -15,12 +15,21 @@ abstract class SongRemoteDataSource {
       {required String playlistId, required String songId});
   Future<void> removeSongFromPlaylist(
       {required String playlistId, required String songId});
+  Future<List<SongModel>> searchSongs(String query);
 }
 
 class SongRemoteDataSourceImpl implements SongRemoteDataSource {
   final Dio dio;
   SongRemoteDataSourceImpl({required this.dio});
 
+  @override
+  Future<List<SongModel>> searchSongs(String query) async {
+    final response = await dio.get('/search', queryParameters: {'q': query});
+    final List<dynamic> data = response.data;
+    return data.map((json) => SongModel.fromJson(json)).toList();
+  }
+
+  // ... (sisa kode biarkan sama)
   @override
   Future<void> removeSongFromPlaylist(
       {required String playlistId, required String songId}) async {
@@ -39,7 +48,6 @@ class SongRemoteDataSourceImpl implements SongRemoteDataSource {
     return PlaylistDetailModel.fromJson(response.data);
   }
 
-  // ... (sisa kode biarkan sama)
   @override
   Future<List<SongModel>> getRecentlyPlayed() async {
     try {

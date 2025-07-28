@@ -3,12 +3,20 @@ import 'package:el_music/presentation/providers/audio_player_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class PlayerPage extends StatelessWidget {
+class PlayerPage extends StatefulWidget {
   const PlayerPage({super.key});
+
+  @override
+  State<PlayerPage> createState() => _PlayerPageState();
+}
+
+class _PlayerPageState extends State<PlayerPage> {
+  bool _showLyrics = false;
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
 
     return Consumer<AudioPlayerProvider>(
       builder: (context, audioProvider, child) {
@@ -39,7 +47,7 @@ class PlayerPage extends StatelessWidget {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                   child: Container(
-                    color: Colors.black.withAlpha(102),
+                    color: Colors.black.withAlpha(153),
                   ),
                 ),
               ),
@@ -56,49 +64,46 @@ class PlayerPage extends StatelessWidget {
                                 color: Colors.white, size: 32),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
+                          Column(
+                            children: [
+                              Text(
+                                'SEDANG DIPUTAR DARI',
+                                style: theme.textTheme.labelSmall
+                                    ?.copyWith(color: Colors.white70),
+                              ),
+                              Text(
+                                'Album',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
                           const Icon(Icons.more_horiz,
                               color: Colors.white, size: 32),
                         ],
                       ),
-                      const Spacer(),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12.0),
-                        child: Image.network(
-                          song.imageUrl,
-                          width: size.width * 0.8,
-                          height: size.width * 0.8,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              width: size.width * 0.8,
-                              height: size.width * 0.8,
-                              color: Colors.grey.shade800,
-                              child: const Icon(Icons.music_note_rounded,
-                                  color: Colors.white, size: 80),
-                            );
-                          },
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () =>
+                              setState(() => _showLyrics = !_showLyrics),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 500),
+                            child: _showLyrics
+                                ? _buildLyricsView(theme)
+                                : _buildCoverArtView(size, song.imageUrl),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 40),
-                      Text(
-                        song.title,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        song.artist,
-                        style: TextStyle(
-                            color: Colors.white.withAlpha(178), fontSize: 16),
-                      ),
-                      const Spacer(),
-                      _buildSongSlider(context, audioProvider),
                       const SizedBox(height: 20),
-                      _buildControls(context, audioProvider),
-                      const Spacer(),
+                      _buildSongDetails(song.title, song.artist),
+                      const SizedBox(height: 20),
+                      _buildSongSlider(audioProvider),
+                      const SizedBox(height: 20),
+                      _buildControls(audioProvider),
+                      const SizedBox(height: 20),
+                      _buildBottomControls(theme),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -110,10 +115,79 @@ class PlayerPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSongSlider(
-      BuildContext context, AudioPlayerProvider audioProvider) {
-    final theme = Theme.of(context);
+  Widget _buildCoverArtView(Size size, String imageUrl) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12.0),
+          child: Image.network(
+            imageUrl,
+            width: size.width * 0.8,
+            height: size.width * 0.8,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: size.width * 0.8,
+                height: size.width * 0.8,
+                color: Colors.grey.shade800,
+                child: const Icon(Icons.music_note_rounded,
+                    color: Colors.white, size: 80),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
+  Widget _buildLyricsView(ThemeData theme) {
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Lirik akan muncul di sini...',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSongDetails(String title, String artist) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                artist,
+                style:
+                    TextStyle(color: Colors.white.withAlpha(178), fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+        const Icon(Icons.star_border, color: Colors.white70),
+      ],
+    );
+  }
+
+  Widget _buildSongSlider(AudioPlayerProvider audioProvider) {
     return Column(
       children: [
         SliderTheme(
@@ -121,10 +195,10 @@ class PlayerPage extends StatelessWidget {
             trackHeight: 4,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
             overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-            activeTrackColor: theme.colorScheme.primary,
-            inactiveTrackColor: theme.colorScheme.primary.withAlpha(77),
-            thumbColor: theme.colorScheme.primary,
-            overlayColor: theme.colorScheme.primary.withAlpha(51),
+            activeTrackColor: Colors.white,
+            inactiveTrackColor: Colors.white.withAlpha(77),
+            thumbColor: Colors.white,
+            overlayColor: Colors.white.withAlpha(51),
           ),
           child: Slider(
             min: 0.0,
@@ -142,23 +216,20 @@ class PlayerPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(_formatDuration(audioProvider.position),
-                style: TextStyle(
-                    color: Colors.white.withAlpha(178), fontSize: 12)),
+                style: const TextStyle(color: Colors.white70, fontSize: 12)),
             Text(_formatDuration(audioProvider.duration),
-                style: TextStyle(
-                    color: Colors.white.withAlpha(178), fontSize: 12)),
+                style: const TextStyle(color: Colors.white70, fontSize: 12)),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildControls(
-      BuildContext context, AudioPlayerProvider audioProvider) {
+  Widget _buildControls(AudioPlayerProvider audioProvider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Icon(Icons.shuffle, color: Colors.white.withAlpha(178), size: 28),
+        const Icon(Icons.shuffle, color: Colors.white70, size: 28),
         const Icon(Icons.skip_previous_rounded, color: Colors.white, size: 48),
         GestureDetector(
           onTap: () {
@@ -177,7 +248,31 @@ class PlayerPage extends StatelessWidget {
           ),
         ),
         const Icon(Icons.skip_next_rounded, color: Colors.white, size: 48),
-        Icon(Icons.repeat, color: Colors.white.withAlpha(178), size: 28),
+        const Icon(Icons.repeat, color: Colors.white70, size: 28),
+      ],
+    );
+  }
+
+  Widget _buildBottomControls(ThemeData theme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+            icon: const Icon(Icons.lyrics_outlined),
+            color: Colors.white70,
+            onPressed: () => setState(() => _showLyrics = !_showLyrics)),
+        IconButton(
+            icon: const Icon(Icons.cast),
+            color: Colors.white70,
+            onPressed: () {}),
+        IconButton(
+            icon: const Icon(Icons.playlist_play_outlined),
+            color: Colors.white70,
+            onPressed: () {}),
+        IconButton(
+            icon: const Icon(Icons.mic_none),
+            color: Colors.white70,
+            onPressed: () {}),
       ],
     );
   }

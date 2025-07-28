@@ -43,13 +43,19 @@ class HomePage extends StatelessWidget {
                         leading: const Icon(Icons.playlist_play),
                         title: Text(playlist.name),
                         onTap: () async {
+                          final navigator = Navigator.of(context);
+                          final messenger = ScaffoldMessenger.of(context);
+
                           final success =
                               await playlistProvider.addSongToPlaylist(
                             playlistId: playlist.id,
                             songId: song.id,
                           );
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
+
+                          if (!context.mounted) return;
+
+                          navigator.pop();
+                          messenger.showSnackBar(
                             SnackBar(
                               content: Text(
                                 success

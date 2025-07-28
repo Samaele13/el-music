@@ -37,14 +37,21 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               leading: const Icon(Icons.remove_circle_outline),
               title: const Text('Hapus dari Playlist ini'),
               onTap: () async {
-                Navigator.of(context).pop();
+                final navigator = Navigator.of(context);
+                final messenger = ScaffoldMessenger.of(context);
                 final provider =
                     Provider.of<PlaylistProvider>(context, listen: false);
+
+                navigator.pop();
+
                 final success = await provider.removeSongFromPlaylist(
                   playlistId: widget.playlistId,
                   song: song,
                 );
-                ScaffoldMessenger.of(context).showSnackBar(
+
+                if (!mounted) return;
+
+                messenger.showSnackBar(
                   SnackBar(
                     content: Text(
                       success

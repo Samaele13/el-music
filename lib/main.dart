@@ -10,6 +10,7 @@ import 'package:el_music/domain/usecases/get_recently_played_usecase.dart';
 import 'package:el_music/domain/usecases/get_search_categories_usecase.dart';
 import 'package:el_music/domain/usecases/get_user_playlists_usecase.dart';
 import 'package:el_music/domain/usecases/remove_song_from_playlist_usecase.dart';
+import 'package:el_music/domain/usecases/search_songs_usecase.dart';
 import 'package:el_music/presentation/pages/main_navigation/main_navigation_page.dart';
 import 'package:el_music/presentation/providers/audio_player_provider.dart';
 import 'package:el_music/presentation/providers/auth_provider.dart';
@@ -35,6 +36,7 @@ void main() {
   final addSongToPlaylistUseCase = AddSongToPlaylistUseCase(songRepository);
   final removeSongFromPlaylistUseCase =
       RemoveSongFromPlaylistUseCase(songRepository);
+  final searchSongsUseCase = SearchSongsUseCase(songRepository);
 
   runApp(
     MultiProvider(
@@ -50,6 +52,7 @@ void main() {
         ChangeNotifierProvider(
           create: (_) => SearchPageProvider(
             getSearchCategoriesUseCase: getSearchCategoriesUseCase,
+            searchSongsUseCase: searchSongsUseCase,
           ),
         ),
         ChangeNotifierProvider(
