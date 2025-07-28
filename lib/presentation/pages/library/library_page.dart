@@ -1,5 +1,6 @@
 import 'package:el_music/presentation/pages/auth/login_page.dart';
 import 'package:el_music/presentation/pages/playlist/playlist_detail_page.dart';
+import 'package:el_music/presentation/pages/subscription/subscription_page.dart';
 import 'package:el_music/presentation/providers/auth_provider.dart';
 import 'package:el_music/presentation/providers/playlist_provider.dart';
 import 'package:flutter/material.dart';
@@ -135,11 +136,29 @@ class LibraryPage extends StatelessWidget {
             child: Icon(Icons.person),
           ),
           const SizedBox(width: 20),
-          const Expanded(
-            child: Text(
-              'Nama Pengguna',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Nama Pengguna',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Premium User',
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.primary),
+                ),
+              ],
             ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const SubscriptionPage()));
+            },
+            child: const Text('Kelola'),
           ),
           TextButton(
             onPressed: () {
