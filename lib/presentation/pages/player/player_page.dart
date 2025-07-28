@@ -1,5 +1,7 @@
 import 'dart:ui';
+import 'package:el_music/domain/entities/lyric_line.dart';
 import 'package:el_music/presentation/providers/audio_player_provider.dart';
+import 'package:el_music/presentation/providers/lyrics_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,14 +14,47 @@ class PlayerPage extends StatefulWidget {
 
 class _PlayerPageState extends State<PlayerPage> {
   bool _showLyrics = false;
+  String? _currentSongId;
+  int _currentLyricIndex = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    final audioProvider =
+        Provider.of<AudioPlayerProvider>(context, listen: false);
+
+    _fetchLyricsForCurrentSong(audioProvider);
+
+    audioProvider.addListener(_onSongChanged);
+  }
+
+  @override
+  void dispose() {
+    Provider.of<AudioPlayerProvider>(context, listen: false)
+        .removeListener(_onSongChanged);
+    super.dispose();
+  }
+
+  void _onSongChanged() {
+    _fetchLyricsForCurrentSong(
+        Provider.of<AudioPlayerProvider>(context, listen: false));
+  }
+
+  void _fetchLyricsForCurrentSong(AudioPlayerProvider audioProvider) {
+    final song = audioProvider.currentSong;
+    if (song != null && song.id != _currentSongId) {
+      _currentSongId = song.id;
+      Provider.of<LyricsProvider>(context, listen: false).fetchLyrics(song.id);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
 
-    return Consumer<AudioPlayerProvider>(
-      builder: (context, audioProvider, child) {
+    return Consumer2<AudioPlayerProvider, LyricsProvider>(
+      builder: (context, audioProvider, lyricsProvider, child) {
         final song = audioProvider.currentSong;
 
         if (song == null) {
@@ -90,7 +125,8 @@ class _PlayerPageState extends State<PlayerPage> {
                           child: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 500),
                             child: _showLyrics
-                                ? _buildLyricsView(theme)
+                                ? _buildLyricsView(theme, lyricsProvider,
+                                    audioProvider.position)
                                 : _buildCoverArtView(size, song.imageUrl),
                           ),
                         ),
@@ -117,6 +153,7 @@ class _PlayerPageState extends State<PlayerPage> {
 
   Widget _buildCoverArtView(Size size, String imageUrl) {
     return Column(
+      key: const ValueKey('coverArt'),
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ClipRRect(
@@ -141,21 +178,50 @@ class _PlayerPageState extends State<PlayerPage> {
     );
   }
 
-  Widget _buildLyricsView(ThemeData theme) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Lirik akan muncul di sini...',
+  Widget _buildLyricsView(ThemeData theme, LyricsProvider lyricsProvider,
+      Duration currentPosition) {
+    if (lyricsProvider.state == DataState.loading) {
+      return const Center(
+          child: CircularProgressIndicator(color: Colors.white));
+    }
+    if (lyricsProvider.state == DataState.error) {
+      return Center(
+          child: Text(lyricsProvider.errorMessage,
+              style: const TextStyle(color: Colors.white)));
+    }
+    if (lyricsProvider.lyrics.isEmpty) {
+      return const Center(
+          child: Text('Lirik tidak tersedia.',
+              style: TextStyle(color: Colors.white70)));
+    }
+
+    int newIndex = -1;
+    for (int i = lyricsProvider.lyrics.length - 1; i >= 0; i--) {
+      if (currentPosition >= lyricsProvider.lyrics[i].timestamp) {
+        newIndex = i;
+        break;
+      }
+    }
+    _currentLyricIndex = newIndex;
+
+    return ListView.builder(
+      key: const ValueKey('lyrics'),
+      itemCount: lyricsProvider.lyrics.length,
+      itemBuilder: (context, index) {
+        final LyricLine line = lyricsProvider.lyrics[index];
+        final isCurrent = index == _currentLyricIndex;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Text(
+            line.text,
             textAlign: TextAlign.center,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: isCurrent ? Colors.white : Colors.white54,
+              fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -259,7 +325,7 @@ class _PlayerPageState extends State<PlayerPage> {
       children: [
         IconButton(
             icon: const Icon(Icons.lyrics_outlined),
-            color: Colors.white70,
+            color: _showLyrics ? theme.colorScheme.primary : Colors.white70,
             onPressed: () => setState(() => _showLyrics = !_showLyrics)),
         IconButton(
             icon: const Icon(Icons.cast),

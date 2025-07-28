@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:el_music/core/failure/failure.dart';
 import 'package:el_music/domain/entities/category.dart';
+import 'package:el_music/domain/entities/lyric_line.dart';
 import 'package:el_music/domain/entities/playlist.dart';
 import 'package:el_music/domain/entities/playlist_detail.dart';
 import 'package:el_music/domain/entities/song.dart';
@@ -17,4 +18,5 @@ abstract class SongRepository {
   Future<Either<Failure, void>> removeSongFromPlaylist(
       {required String playlistId, required String songId});
   Future<Either<Failure, List<Song>>> searchSongs(String query);
+  Future<Either<Failure, List<LyricLine>>> getLyricsForSong(String songId);
 }

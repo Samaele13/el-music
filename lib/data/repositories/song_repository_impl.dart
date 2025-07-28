@@ -3,6 +3,7 @@ import 'package:el_music/core/failure/exception.dart';
 import 'package:el_music/core/failure/failure.dart';
 import 'package:el_music/data/datasources/song_remote_data_source.dart';
 import 'package:el_music/domain/entities/category.dart';
+import 'package:el_music/domain/entities/lyric_line.dart';
 import 'package:el_music/domain/entities/playlist.dart';
 import 'package:el_music/domain/entities/playlist_detail.dart';
 import 'package:el_music/domain/entities/song.dart';
@@ -11,6 +12,17 @@ import 'package:el_music/domain/repositories/song_repository.dart';
 class SongRepositoryImpl implements SongRepository {
   final SongRemoteDataSource remoteDataSource;
   SongRepositoryImpl({required this.remoteDataSource});
+
+  @override
+  Future<Either<Failure, List<LyricLine>>> getLyricsForSong(
+      String songId) async {
+    try {
+      final remoteLyrics = await remoteDataSource.getLyricsForSong(songId);
+      return Right(remoteLyrics);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
 
   @override
   Future<Either<Failure, List<Song>>> searchSongs(String query) async {
@@ -22,7 +34,6 @@ class SongRepositoryImpl implements SongRepository {
     }
   }
 
-  // ... (sisa kode biarkan sama)
   @override
   Future<Either<Failure, void>> removeSongFromPlaylist(
       {required String playlistId, required String songId}) async {

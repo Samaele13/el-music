@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:el_music/data/models/category_model.dart';
+import 'package:el_music/data/models/lyric_line_model.dart';
 import 'package:el_music/data/models/playlist_detail_model.dart';
 import 'package:el_music/data/models/playlist_model.dart';
 import 'package:el_music/data/models/song_model.dart';
@@ -16,11 +17,19 @@ abstract class SongRemoteDataSource {
   Future<void> removeSongFromPlaylist(
       {required String playlistId, required String songId});
   Future<List<SongModel>> searchSongs(String query);
+  Future<List<LyricLineModel>> getLyricsForSong(String songId);
 }
 
 class SongRemoteDataSourceImpl implements SongRemoteDataSource {
   final Dio dio;
   SongRemoteDataSourceImpl({required this.dio});
+
+  @override
+  Future<List<LyricLineModel>> getLyricsForSong(String songId) async {
+    final response = await dio.get('/lyrics/$songId');
+    final List<dynamic> data = response.data;
+    return data.map((json) => LyricLineModel.fromJson(json)).toList();
+  }
 
   @override
   Future<List<SongModel>> searchSongs(String query) async {
@@ -29,7 +38,6 @@ class SongRemoteDataSourceImpl implements SongRemoteDataSource {
     return data.map((json) => SongModel.fromJson(json)).toList();
   }
 
-  // ... (sisa kode biarkan sama)
   @override
   Future<void> removeSongFromPlaylist(
       {required String playlistId, required String songId}) async {
